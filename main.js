@@ -16,15 +16,13 @@ let obj = [
 ]
 
 const setDataStorage = () => {
-    const getData = JSON.parse(localStorage.getItem('TodoListData'))
-    if(getData != null) obj = getData
+    const loadData = JSON.parse(document.cookie.split('=')[1]) 
+    loadData != null ? obj = loadData : void 0
 }
 
 setDataStorage()
 
-const saveDataStorage = () => {
-    localStorage.setItem('TodoListData', JSON.stringify(obj))
-}
+const saveDataStorage = () => document.cookie = `todo-data=${JSON.stringify(obj)}`
 
 const render = () => {
     todoList.textContent      = ""
@@ -41,17 +39,15 @@ const render = () => {
                         <button class="todo-complete"></button>
                     </div>
             `
-        if (el.completed) todoCompleted.append(li)
-        else todoList.append(li)
-
+        el.completed ? todoCompleted.append(li) : todoList.append(li)
         saveDataStorage()
-
     })
 }
 render()
 
 todoControl.addEventListener("submit", event => {
     event.preventDefault()
+
     const input = todoControl.querySelector("input")
     
     if(input.value == "") return
@@ -62,7 +58,8 @@ todoControl.addEventListener("submit", event => {
     }
     
     obj.push(newObj)
-    render();
+    render()
+    input.value = ''
 });
 
 const search = elem => {
@@ -72,7 +69,7 @@ const search = elem => {
     obj.forEach((el, index) => {
         if (el.value === elemText) {
             if (el.completed === elemCompleted) {
-                ind = index;
+                ind = index
             }
         }
     })
@@ -86,19 +83,16 @@ todoContainer.addEventListener("click", event => {
     const target = event.target
     if (!target.matches("button")) return
 
-    if (target.matches(".todo-remove")) {
-        let index = search(target.closest("li"))
+    let index = search(target.closest("li"))
 
+    if (target.matches(".todo-remove")) {
         obj.splice(index, 1)
-        saveDataStorage()
-    };
+    }
 
     if (target.matches(".todo-complete")) {
-        let index = search(target.closest("li"))
-        
         obj[index].completed = !obj[index].completed
-        
-        saveDataStorage()
-    };
+    }
+
+    saveDataStorage()
     render()
 })
